@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import '../models/question.dart';
 import '../models/user.dart';
 import './main_page.dart';
-
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -85,6 +85,42 @@ class _LoginPageState extends State<LoginPage> {
               OutlinedButton(
                 onPressed: _register,
                 child: const Text('Register'),
+              ),
+              OutlinedButton(
+                onPressed: () async {
+                  final confirm = await showDialog<bool>(
+                    context: context,
+                    builder:
+                        (ctx) => AlertDialog(
+                          title: const Text('Confirm Deletion'),
+                          content: const Text(
+                            'Are you sure you want to delete all data?',
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(ctx, false),
+                              child: const Text('Cancel'),
+                            ),
+                            TextButton(
+                              onPressed: () => Navigator.pop(ctx, true),
+                              child: const Text('Delete'),
+                            ),
+                          ],
+                        ),
+                  );
+
+                  if (confirm == true) {
+                    await Hive.box<User>('users').clear();
+                    await Hive.box<Question>('questions').clear();
+                    await Hive.box('quiz_scores').clear();
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('All data deleted')),
+                    );
+                  }
+                },
+                style: OutlinedButton.styleFrom(foregroundColor: Colors.red),
+                child: const Text('Delete All Data'),
               ),
             ],
           ),
