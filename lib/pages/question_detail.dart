@@ -34,12 +34,21 @@ class _QuestionDetailPageState extends State<QuestionDetailPage> {
     if (_formKey.currentState!.validate()) {
       final questionText = _questionController.text;
       final correctAnswer = _correctAnswerController.text;
-      final allChoices = [
+      final rawChoices = [
         correctAnswer,
         ..._choiceControllers.map((c) => c.text),
       ];
 
-      allChoices.shuffle(); // shuffle so correct answer is mixed
+      final allChoices = rawChoices.toSet().toList(); // Removes duplicates
+
+      if (allChoices.length < 4) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('All choices must be unique!')),
+        );
+        return;
+      }
+
+      allChoices.shuffle(); // Optional: randomize display order
 
       final newQuestion = Question(
         question: questionText,
